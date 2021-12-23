@@ -1,16 +1,17 @@
 import requests
-import json
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 from datetime import date
 
 
-
+PAHT_TEXTOS = "./../../dataset/"
 CODIGOS_PROVINCIA_AEMET={
-    'alicante':"03"
+    'alicante':"03",
+    'rioja':"26",
+    'madrid':"28",
+    'tenerife':"381"
 }
-
 
 def getParameterEnv(name):
     """
@@ -40,7 +41,8 @@ def authRequest(value):
     params = {
         'api_key': getParameterEnv("KEY")
     }
-    url = getParameterEnv("URL_TEXT_HOY").format(var1=value) + "2021-12-22"
+   
+    url = getParameterEnv("URL_TEXT_HOY").format(var1=value) + "2021-12-22" #date.today().strftime("%Y-%m-%d")
     print(url)
     headers = {
          'cache-control': "no-cache"
@@ -51,13 +53,18 @@ def authRequest(value):
 def saveText(data,value):
     """
     consigue el texto de la predicción meteorologica y lo guarda
+    data: URL que contiene el texto de la predicción meteorologica
+    value: nombre de la provincia que se guarda los datos
     """
     response = requests.get(data["datos"])
-    print(value)
-    
-   
-
-
+    path = "%s%s/"%(PAHT_TEXTOS,"prueba")
+    #si no existe el directorio se crea
+    if  not os.path.exists(path):
+        os.makedirs(path)
+    fichero = open("%s%s.txt"%(path,"2021-12-22"),"w")
+    fichero.write(response.text)
+    fichero.close()
+    print("Predición meteorologica de %s del dia %s guardada"%(value,"2021-12-22"))
 
 
 def run_api(arg, **kwargs):
