@@ -12,8 +12,6 @@ CODIGOS_PROVINCIA_AEMET={
 }
 
 
-
-
 def getParameterEnv(name):
     """
     recoge el value pasando un key del fichero .env
@@ -21,7 +19,6 @@ def getParameterEnv(name):
     """
     #consigue el parametro del .env
     return os.environ.get(name)
-
 
 def getEnv():
     """
@@ -34,7 +31,7 @@ def getEnv():
     #toma las variables de entorno de .env.
     load_dotenv(file_env)
    
-def authRequest():
+def authRequest(value):
     """
     se encarga de recoger y guardar en la base de datos toda la información númerica y/o texto de los datos de AEMT
     dates<lst>: lista que contiene el rango de fechas para recuperar la información
@@ -43,15 +40,22 @@ def authRequest():
     params = {
         'api_key': getParameterEnv("KEY")
     }
-    url = getParameterEnv("URL_TEXT_HOY").format(var1=CODIGOS_PROVINCIA_AEMET['alicante']) + date.today().strftime("%Y-%m-%d")
+    url = getParameterEnv("URL_TEXT_HOY").format(var1=value) + "2021-12-22"
+    print(url)
     headers = {
          'cache-control': "no-cache"
     }
-
-    response = requests.get(url,headers=headers, params=params)
-    
+    response = requests.get(url,headers=headers, params=params) 
     return response.json()
     
+def saveText(data,value):
+    """
+    consigue el texto de la predicción meteorologica y lo guarda
+    """
+    response = requests.get(data["datos"])
+    print(value)
+    
+   
 
 
 
@@ -66,7 +70,9 @@ def run_api(arg, **kwargs):
     getEnv()
     #hace llamada a la API
     if arg=="t":
-        json = authRequest()
+        for key, value in CODIGOS_PROVINCIA_AEMET.items():
+            json = authRequest(value)
+            saveText(json,key)
 
     """ 
     for date in range(int(dates[0]),int(dates[1])):
